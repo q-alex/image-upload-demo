@@ -12,6 +12,7 @@ app.use(express.static('views'));
 app.use(express.static('public'));
 app.use(express.static('uploads'));
 
+// set up file saving
 var fileUpload = multer({storage: multer.diskStorage({
 	destination: function(req, file, cb) {
 		cb(null, 'uploads');
@@ -22,19 +23,25 @@ var fileUpload = multer({storage: multer.diskStorage({
     });
   }
 })});
+
+// set up handling image urls
 var webUpload = multer();
 
+// set up url for sending files to
 app.post('/file-image-upload', fileUpload.single('image'), function(req ,res) {
 	console.log(req.file);
 	res.status(204).end();
 });
 
+// set up url for sending image urls to
 app.post('/web-image-upload', webUpload.single('url'), function(req, res) {
 	console.log(req.body.url);
 
+	// grab file extension from url
 	var fileExtension = req.body.url.split('/');
 	fileExtension = fileExtension[fileExtension.length - 1].split('.')[1];
 
+	// save file with random name to avoid name clash
 	var fileName = crypto.randomBytes(16).toString('hex') + Date.now() + '.' + fileExtension;
 	var file = fs.createWriteStream('./uploads/' + fileName );
 	var request = http.get(req.body.url, function(response) {
@@ -43,5 +50,6 @@ app.post('/web-image-upload', webUpload.single('url'), function(req, res) {
 	res.status(204).end();
 });
 
+// set up url for upload interface
 var port = 3000;
 app.listen( port, function(){ console.log('listening on port ' + port); } );

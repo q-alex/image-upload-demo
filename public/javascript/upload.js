@@ -1,49 +1,61 @@
-var dropbox = document.getElementById('preview');
+var dropbox = document.getElementById('preview'); // grab reference to image preview box
 
+// add drag and drop functionality
 dropbox.addEventListener('dragenter', noopHandler, false);
 dropbox.addEventListener('dragexit', noopHandler, false);
 dropbox.addEventListener('dragover', noopHandler, false);
 dropbox.addEventListener('drop', drop, false);
 
+// make sure nothing happens
 function noopHandler(event) {
     event.preventDefault();
 }
 
+// overide default behavior with upload functionality
 function drop(event) {
     event.stopPropagation();
     event.preventDefault();
 
     var dataValue;
 
+    // atempt to get image url for multiple browsers
     try {
       dataValue = event.dataTransfer.getData('text/uri-list');
     } catch (e) {
       dataValue = event.dataTransfer.getData('URL');
     }
 
+    var myRequest = new XMLHttpRequest(); // for sending file to server
 
     if (dataValue) {
+      // set preview to the image
       dropbox.src = dataValue;
-      var test = new FormData();
+
+      // wrap url for sending
+      var imageLink = new FormData(); // package to send
       test.append('url', dataValue);
 
-      var myRequest = new XMLHttpRequest();
+      // send image url
       myRequest.open('POST', 'http://localhost:3000/web-image-upload', true);
-      myRequest.send(test);
+      myRequest.send(imageLink);
 
 
     } else {
+      // get files to be uploaded
       var dataFiles = event.dataTransfer.files;
 
+      // take the first file
       var dataFile = dataFiles[0];
 
-      var test = new FormData();
-      test.append('image', dataFile);
+      // wrap file for sending
+      var desktopImage = new FormData(); // package to send
+      desktopImage.append('image', dataFile);
 
-      var myRequest = new XMLHttpRequest();
+      // send file
       myRequest.open('POST', 'http://localhost:3000/file-image-upload', true);
-      myRequest.send(test);
+      myRequest.send(desktopImage);
 
+      // load file for preview
       var reader = new FileReader();
 
       reader.onload = function (dataValue) {
